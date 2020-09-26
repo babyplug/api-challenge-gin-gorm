@@ -27,5 +27,12 @@ func main() {
 	r.PUT("/author/:id", controllers.UpdateAuthorById)
 	r.DELETE("/author/:id", controllers.DeleteAuthorById)
 
+	// Photo
+	r.GET("/photo", controllers.FindPhoto)
+	r.POST("/photo", controllers.CreatePhoto)
+	r.GET("/photo/:id", controllers.FindPhotoById)
+	r.PUT("/photo/:id", controllers.UpdatePhotoById)
+	r.DELETE("/photo/:id", controllers.DeletePhotoById)
+
 	r.Run()
 }

@@ -13,11 +13,19 @@ func main() {
 
 	database.ConnectDatabase()
 
+	// user
 	r.GET("/user", controllers.FindUser)
 	r.POST("/user", controllers.CreateUser)
 	r.GET("/user/:id", controllers.FindUserById)
 	r.PUT("/user/:id", controllers.UpdateUserById)
 	r.DELETE("/user/:id", controllers.DeleteUserById)
+
+	// Author
+	r.GET("/author", controllers.FindAuthor)
+	r.POST("/author", controllers.CreateAuthor)
+	r.GET("/author/:id", controllers.FindAuthorById)
+	r.PUT("/author/:id", controllers.UpdateAuthorById)
+	r.DELETE("/author/:id", controllers.DeleteAuthorById)
 
 	r.Run()
 }

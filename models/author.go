@@ -5,8 +5,8 @@ import (
 )
 
 type Author struct {
-	ID						uint
-	Name         	string
-	Photos				[]Photo	`gorm:"foreignKey:AuthorId"`
+	ID     uint
+	Name   string
+	Photos []Photo `gorm:"foreignKey:AuthorId"`
 	gorm.Model
 }

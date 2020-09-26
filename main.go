@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/babyplug/api-challenge-gin-gorm/database"
-	"github.com/babyplug/api-challenge-gin-gorm/models"
 	_ "fmt"
+
+	"github.com/babyplug/api-challenge-gin-gorm/controllers"
+	"github.com/babyplug/api-challenge-gin-gorm/database"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -12,14 +13,11 @@ func main() {
 
 	database.ConnectDatabase()
 
-	r.GET("/ping", func(c *gin.Context) {
-		var users []models.User
-		database.DB.Find(&users)
-		c.JSON(200, gin.H{
-			"message": "pong",
-			"data": users,
-		})
-	})
+	r.GET("/user", controllers.FindUser)
+	r.POST("/user", controllers.CreateUser)
+	r.GET("/user/:id", controllers.FindUserById)
+	r.PUT("/user/:id", controllers.UpdateUserById)
+	r.DELETE("/user/:id", controllers.DeleteUserById)
 
 	r.Run()
 }

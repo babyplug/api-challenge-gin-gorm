@@ -41,5 +41,12 @@ func main() {
 	r.PUT("/photo-metadata/:id", controllers.UpdatePhotoMetadataById)
 	r.DELETE("/photo-metadata/:id", controllers.DeletePhotoMetadataById)
 
+	// PhotoMetadata
+	r.GET("/album", controllers.FindAlbum)
+	r.POST("/album", controllers.CreateAlbum)
+	r.GET("/album/:id", controllers.FindAlbumById)
+	r.PUT("/album/:id", controllers.UpdateAlbumById)
+	r.DELETE("/album/:id", controllers.DeleteAlbumById)
+
 	r.Run()
 }

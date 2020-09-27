@@ -18,26 +18,18 @@ type PhotoMetadataRequestform struct {
 	PhotoId     uint   `json:"photoId" binding:"required"`
 }
 
-func FindAllPhotoMetadata(c *gin.Context) {
+func FindAllPhotoMetadata(c *gin.Context) ([]models.PhotoMetadata, error) {
 	var photoMetadata []models.PhotoMetadata
 	database.DB.Find(&photoMetadata)
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": photoMetadata,
-		},
-	)
+	return photoMetadata, nil
 }
 
-func CreatePhotoMetadata(c *gin.Context) {
+func CreatePhotoMetadata(c *gin.Context) (models.PhotoMetadata, error) {
 	var form PhotoMetadataRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return models.PhotoMetadata{}, nil
 	}
 
-	// Create book
 	photoMetadata := models.PhotoMetadata{
 		Height:      form.Height,
 		Width:       form.Width,
@@ -47,13 +39,7 @@ func CreatePhotoMetadata(c *gin.Context) {
 		PhotoId:     form.PhotoId,
 	}
 	database.DB.Create(&photoMetadata)
-
-	c.JSON(
-		http.StatusCreated,
-		gin.H{
-			"data": photoMetadata,
-		},
-	)
+	return photoMetadata, nil
 }
 
 func getPhotoMetadataById(id string) (models.PhotoMetadata, error) {
@@ -64,42 +50,23 @@ func getPhotoMetadataById(id string) (models.PhotoMetadata, error) {
 	return photoMetadata, nil
 }
 
-func FindPhotoMetadataById(c *gin.Context) {
+func FindPhotoMetadataById(c *gin.Context) (models.PhotoMetadata, error) {
 	photoMetadata, err := getPhotoMetadataById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return photoMetadata, err
 	}
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": photoMetadata,
-		},
-	)
+	return photoMetadata, nil
 }
 
-func UpdatePhotoMetadataById(c *gin.Context) {
+func UpdatePhotoMetadataById(c *gin.Context) (models.PhotoMetadata, error, int) {
 	photoMetadata, err := getPhotoMetadataById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return photoMetadata, err, http.StatusNotFound
 	}
 
 	var form PhotoMetadataRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return photoMetadata, err, http.StatusBadRequest
 	}
 	photoMetadata.Height = form.Height
 	photoMetadata.Width = form.Width
@@ -108,33 +75,14 @@ func UpdatePhotoMetadataById(c *gin.Context) {
 	photoMetadata.Comment = form.Comment
 	photoMetadata.PhotoId = form.PhotoId
 	database.DB.Save(&photoMetadata)
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": photoMetadata,
-		},
-	)
+	return photoMetadata, nil, http.StatusOK
 }
 
-func DeletePhotoMetadataById(c *gin.Context) {
+func DeletePhotoMetadataById(c *gin.Context) error {
 	photoMetadata, err := getPhotoMetadataById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return err
 	}
-
 	database.DB.Delete(photoMetadata)
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"status": "success",
-		},
-	)
-
+	return nil
 }

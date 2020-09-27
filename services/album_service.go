@@ -14,23 +14,16 @@ type AlbumRequestform struct {
 	Photos []uint `json:"photoId,omitempty"`
 }
 
-func FindAllAlbum(c *gin.Context) {
+func FindAllAlbum(c *gin.Context) ([]models.Album, error) {
 	var albums []models.Album
 	database.DB.Find(&albums)
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": albums,
-		},
-	)
+	return albums, nil
 }
 
-func CreateAlbum(c *gin.Context) {
+func CreateAlbum(c *gin.Context) (models.Album, error) {
 	var form AlbumRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return models.Album{}, err
 	}
 
 	// Create book
@@ -39,12 +32,7 @@ func CreateAlbum(c *gin.Context) {
 	}
 	database.DB.Create(&album)
 
-	c.JSON(
-		http.StatusCreated,
-		gin.H{
-			"data": album,
-		},
-	)
+	return album, nil
 }
 
 func getAlbumById(id string) (models.Album, error) {
@@ -55,72 +43,37 @@ func getAlbumById(id string) (models.Album, error) {
 	return album, nil
 }
 
-func FindAlbumById(c *gin.Context) {
+func FindAlbumById(c *gin.Context) (models.Album, error) {
 	album, err := getAlbumById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return models.Album{}, err
 	}
 
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": album,
-		},
-	)
+	return album, nil
 }
 
-func UpdateAlbumById(c *gin.Context) {
+func UpdateAlbumById(c *gin.Context) (models.Album, error, int) {
 	album, err := getAlbumById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return models.Album{}, err, http.StatusNotFound
 	}
 
 	var form AlbumRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return models.Album{}, err, http.StatusBadRequest
 	}
 	album.Name = form.Name
 	database.DB.Save(&album)
 
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": album,
-		},
-	)
+	return album, nil, http.StatusOK
 }
 
-func DeleteAlbumById(c *gin.Context) {
+func DeleteAlbumById(c *gin.Context) error {
 	album, err := getAlbumById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return err
 	}
 
 	database.DB.Delete(album)
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"status": "success",
-		},
-	)
-
+	return nil
 }

@@ -11,40 +11,26 @@ import (
 
 type AuthorRequestform struct {
 	Name   string `json:"name" binding:"required"`
-	Photos []uint `json:"Photos,omitempty"`
+	Photos []uint `json:"photoId,omitempty"`
 }
 
-func FindAllAuthor(c *gin.Context) {
+func FindAllAuthor(c *gin.Context) ([]models.Author, error) {
 	var authors []models.Author
 	database.DB.Find(&authors)
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": authors,
-		},
-	)
+	return authors, nil
 }
 
-func CreateAuthor(c *gin.Context) {
+func CreateAuthor(c *gin.Context) (models.Author, error) {
 	var form AuthorRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return models.Author{}, err
 	}
 
-	// Create book
 	author := models.Author{
 		Name: form.Name,
 	}
 	database.DB.Create(&author)
-
-	c.JSON(
-		http.StatusCreated,
-		gin.H{
-			"data": author,
-		},
-	)
+	return author, nil
 }
 
 func getAuthorById(id string) (models.Author, error) {
@@ -55,72 +41,35 @@ func getAuthorById(id string) (models.Author, error) {
 	return author, nil
 }
 
-func FindAuthorById(c *gin.Context) {
+func FindAuthorById(c *gin.Context) (models.Author, error) {
 	author, err := getAuthorById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return models.Author{}, err
 	}
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": author,
-		},
-	)
+	return author, nil
 }
 
-func UpdateAuthorById(c *gin.Context) {
+func UpdateAuthorById(c *gin.Context) (models.Author, error, int) {
 	author, err := getAuthorById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return author, err, http.StatusNotFound
 	}
 
 	var form AuthorRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return author, err, http.StatusBadRequest
 	}
 	author.Name = form.Name
 	database.DB.Save(&author)
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": author,
-		},
-	)
+	return author, nil, http.StatusOK
 }
 
-func DeleteAuthorById(c *gin.Context) {
+func DeleteAuthorById(c *gin.Context) error {
 	author, err := getAuthorById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return err
 	}
 
 	database.DB.Delete(author)
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"status": "success",
-		},
-	)
-
+	return nil
 }

@@ -18,23 +18,16 @@ type PhotoRequestform struct {
 	AuthorId    uint   `json:"authorId" binding:"required"`
 }
 
-func FindAllPhoto(c *gin.Context) {
+func FindAllPhoto(c *gin.Context) ([]models.Photo, error) {
 	var photos []models.Photo
 	database.DB.Find(&photos)
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": photos,
-		},
-	)
+	return photos, nil
 }
 
-func CreatePhoto(c *gin.Context) {
+func CreatePhoto(c *gin.Context) (models.Photo, error) {
 	var form PhotoRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return models.Photo{}, err
 	}
 
 	// Create book
@@ -47,13 +40,7 @@ func CreatePhoto(c *gin.Context) {
 		AuthorId:    form.AuthorId,
 	}
 	database.DB.Create(&photo)
-
-	c.JSON(
-		http.StatusCreated,
-		gin.H{
-			"data": photo,
-		},
-	)
+	return photo, nil
 }
 
 func getPhotoById(id string) (models.Photo, error) {
@@ -64,72 +51,41 @@ func getPhotoById(id string) (models.Photo, error) {
 	return photo, nil
 }
 
-func FindPhotoById(c *gin.Context) {
+func FindPhotoById(c *gin.Context) (models.Photo, error) {
 	photo, err := getPhotoById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return photo, err
 	}
-
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": photo,
-		},
-	)
+	return photo, nil
 }
 
-func UpdatePhotoById(c *gin.Context) {
+func UpdatePhotoById(c *gin.Context) (models.Photo, error, int) {
 	photo, err := getPhotoById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return photo, err, http.StatusNotFound
 	}
 
 	var form PhotoRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		return photo, err, http.StatusBadRequest
 	}
-	photo.Name = form.Name
-	database.DB.Save(&photo)
 
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"data": photo,
-		},
-	)
+	photo.Name = form.Name
+	photo.Description = form.Description
+	photo.FileName = form.FileName
+	photo.IsPublished = form.IsPublished
+	photo.Views = form.Views
+	photo.AuthorId = form.AuthorId
+
+	database.DB.Save(&photo)
+	return photo, nil, http.StatusOK
 }
 
-func DeletePhotoById(c *gin.Context) {
+func DeletePhotoById(c *gin.Context) error {
 	photo, err := getPhotoById(c.Param("id"))
 	if err != nil {
-		c.JSON(
-			http.StatusBadRequest,
-			gin.H{
-				"error": err.Error(),
-			},
-		)
-		return
+		return err
 	}
-
-	database.DB.Delete(photo)
-	c.JSON(
-		http.StatusOK,
-		gin.H{
-			"status": "success",
-		},
-	)
-
+	database.DB.Delete(&photo)
+	return nil
 }

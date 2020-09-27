@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/babyplug/api-challenge-gin-gorm/dto"
 	"github.com/babyplug/api-challenge-gin-gorm/services"
 	"github.com/gin-gonic/gin"
 )
@@ -23,13 +24,22 @@ func FindAlbum(c *gin.Context) {
 	)
 }
 
-func CreateAlbum(c *gin.Context) {
-	album, err := services.CreateAlbum(c)
+func bindJsonToForm(c *gin.Context, form *dto.AlbumRequestForm) error {
+	if err := c.ShouldBindJSON(form); err != nil {
+		return err
+	}
+	return nil
+}
 
+func CreateAlbum(c *gin.Context) {
+	var form dto.AlbumRequestForm
+	err := bindJsonToForm(c, &form)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	album, _ := services.CreateAlbum(&form)
 
 	c.JSON(
 		http.StatusCreated,
@@ -40,8 +50,7 @@ func CreateAlbum(c *gin.Context) {
 }
 
 func FindAlbumById(c *gin.Context) {
-	album, err := services.FindAlbumById(c)
-
+	album, err := services.FindAlbumById(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -56,10 +65,16 @@ func FindAlbumById(c *gin.Context) {
 }
 
 func UpdateAlbumById(c *gin.Context) {
-	album, err, httpStatusCode := services.UpdateAlbumById(c)
-
+	var form dto.AlbumRequestForm
+	err := bindJsonToForm(c, &form)
 	if err != nil {
-		c.JSON(httpStatusCode, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	album, err := services.UpdateAlbumById(c.Param("id"), &form)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -72,7 +87,7 @@ func UpdateAlbumById(c *gin.Context) {
 }
 
 func DeleteAlbumById(c *gin.Context) {
-	err := services.DeleteAlbumById(c)
+	err := services.DeleteAlbumById(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

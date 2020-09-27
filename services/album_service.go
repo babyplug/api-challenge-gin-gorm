@@ -2,17 +2,12 @@ package services
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/babyplug/api-challenge-gin-gorm/database"
+	"github.com/babyplug/api-challenge-gin-gorm/dto"
 	"github.com/babyplug/api-challenge-gin-gorm/models"
 	"github.com/gin-gonic/gin"
 )
-
-type AlbumRequestform struct {
-	Name   string `json:"name" binding:"required"`
-	Photos []uint `json:"photoId,omitempty"`
-}
 
 func FindAllAlbum(c *gin.Context) ([]models.Album, error) {
 	var albums []models.Album
@@ -20,18 +15,11 @@ func FindAllAlbum(c *gin.Context) ([]models.Album, error) {
 	return albums, nil
 }
 
-func CreateAlbum(c *gin.Context) (models.Album, error) {
-	var form AlbumRequestform
-	if err := c.ShouldBindJSON(&form); err != nil {
-		return models.Album{}, err
-	}
-
-	// Create book
+func CreateAlbum(form *dto.AlbumRequestForm) (models.Album, error) {
 	album := models.Album{
 		Name: form.Name,
 	}
 	database.DB.Create(&album)
-
 	return album, nil
 }
 
@@ -43,33 +31,27 @@ func getAlbumById(id string) (models.Album, error) {
 	return album, nil
 }
 
-func FindAlbumById(c *gin.Context) (models.Album, error) {
-	album, err := getAlbumById(c.Param("id"))
+func FindAlbumById(id string) (models.Album, error) {
+	album, err := getAlbumById(id)
 	if err != nil {
-		return models.Album{}, err
+		return album, err
 	}
-
 	return album, nil
 }
 
-func UpdateAlbumById(c *gin.Context) (models.Album, error, int) {
-	album, err := getAlbumById(c.Param("id"))
+func UpdateAlbumById(id string, form *dto.AlbumRequestForm) (models.Album, error) {
+	album, err := getAlbumById(id)
 	if err != nil {
-		return models.Album{}, err, http.StatusNotFound
+		return album, err
 	}
 
-	var form AlbumRequestform
-	if err := c.ShouldBindJSON(&form); err != nil {
-		return models.Album{}, err, http.StatusBadRequest
-	}
 	album.Name = form.Name
 	database.DB.Save(&album)
-
-	return album, nil, http.StatusOK
+	return album, nil
 }
 
-func DeleteAlbumById(c *gin.Context) error {
-	album, err := getAlbumById(c.Param("id"))
+func DeleteAlbumById(id string) error {
+	album, err := getAlbumById(id)
 	if err != nil {
 		return err
 	}

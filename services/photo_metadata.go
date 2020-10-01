@@ -5,18 +5,10 @@ import (
 	"net/http"
 
 	"github.com/babyplug/api-challenge-gin-gorm/database"
+	"github.com/babyplug/api-challenge-gin-gorm/dto"
 	"github.com/babyplug/api-challenge-gin-gorm/models"
 	"github.com/gin-gonic/gin"
 )
-
-type PhotoMetadataRequestform struct {
-	Height      int64  `json:"height" binding:"required"`
-	Width       int64  `json:"width" binding:"required"`
-	Orientation string `json:"orientation" binding:"required"`
-	Compressed  int64  `json:"compressed" binding:"required"`
-	Comment     string `json:"comment" binding:"required"`
-	PhotoId     uint   `json:"photoId" binding:"required"`
-}
 
 func FindAllPhotoMetadata(c *gin.Context) ([]models.PhotoMetadata, error) {
 	var photoMetadata []models.PhotoMetadata
@@ -25,7 +17,7 @@ func FindAllPhotoMetadata(c *gin.Context) ([]models.PhotoMetadata, error) {
 }
 
 func CreatePhotoMetadata(c *gin.Context) (models.PhotoMetadata, error) {
-	var form PhotoMetadataRequestform
+	var form dto.PhotoMetadataRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
 		return models.PhotoMetadata{}, nil
 	}
@@ -64,7 +56,7 @@ func UpdatePhotoMetadataById(c *gin.Context) (models.PhotoMetadata, error, int) 
 		return photoMetadata, err, http.StatusNotFound
 	}
 
-	var form PhotoMetadataRequestform
+	var form dto.PhotoMetadataRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
 		return photoMetadata, err, http.StatusBadRequest
 	}

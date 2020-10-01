@@ -1,0 +1,13 @@
+# NOTE !! you should add this file to .gitignore for your security
+app:
+  mode: "dev"
+  port: 8080
+  debug: true
+  secret: "ThisIsWhatYourSecretSettingHere"
+
+mysql:
+  dsn: "root:@tcp(127.0.0.1:3306)/gorm?charset=utf8mb4&parseTime=True&loc=Local"
+
+log:
+  level: "debug"
+  format: "json"

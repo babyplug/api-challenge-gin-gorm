@@ -2,6 +2,7 @@ package database
 
 import (
 	"github.com/babyplug/api-challenge-gin-gorm/models"
+	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -9,7 +10,7 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	dsn := "root:@tcp(127.0.0.1:3306)/gorm?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := viper.GetString("mysql.dsn")
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// DisableForeignKeyConstraintWhenMigrating: true,
 

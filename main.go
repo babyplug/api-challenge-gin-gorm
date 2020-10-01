@@ -1,23 +1,35 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/babyplug/api-challenge-gin-gorm/controllers"
 	"github.com/babyplug/api-challenge-gin-gorm/database"
 	"github.com/babyplug/api-challenge-gin-gorm/middleware"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
-var (
-	router = gin.Default()
-)
+func setupViper() {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {             // Handle errors reading the config file
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+
+	if viper.GetString("app.mode") == "prod" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+}
 
 func main() {
-	// router := gin.Default()
+	setupViper()
 	database.ConnectDatabase()
 
-	// set all routes with prefix "/api"
+	router := gin.Default()
 	apiRouter := router.Group("/api")
-
 	apiRouter.POST("/login", controllers.Login)
 
 	{

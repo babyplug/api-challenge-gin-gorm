@@ -5,20 +5,11 @@ import (
 	"net/http"
 
 	"github.com/babyplug/api-challenge-gin-gorm/database"
+	"github.com/babyplug/api-challenge-gin-gorm/dto"
 	"github.com/babyplug/api-challenge-gin-gorm/models"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type UserRequestform struct {
-	Name      string  `json:"name" binding:"required"`
-	Email     *string `json:"email" binding:"required"`
-	Age       uint8   `json:"age" binding:"required"`
-	FirstName string  `json:"firstName" binding:"required"`
-	LastName  string  `json:"lastName" binding:"required"`
-	Username  string  `json:"username" binding:"required"`
-	Password  string  `json:"password" binding:"required"`
-}
 
 func FindAllUser(c *gin.Context) {
 	var users []models.User
@@ -33,7 +24,7 @@ func FindAllUser(c *gin.Context) {
 }
 
 func CreateUser(c *gin.Context) {
-	var form UserRequestform
+	var form dto.UserRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -109,7 +100,7 @@ func UpdateUserById(c *gin.Context) {
 		return
 	}
 
-	var form UserRequestform
+	var form dto.UserRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

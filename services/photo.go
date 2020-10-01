@@ -5,18 +5,10 @@ import (
 	"net/http"
 
 	"github.com/babyplug/api-challenge-gin-gorm/database"
+	"github.com/babyplug/api-challenge-gin-gorm/dto"
 	"github.com/babyplug/api-challenge-gin-gorm/models"
 	"github.com/gin-gonic/gin"
 )
-
-type PhotoRequestform struct {
-	Description string `json:"description" binding:"required"`
-	FileName    string `json:"fileName" binding:"required"`
-	IsPublished bool   `json:"isPublished" binding:"required"`
-	Name        string `json:"name" binding:"required"`
-	Views       int64  `json:"views" binding:"required"`
-	AuthorId    uint   `json:"authorId" binding:"required"`
-}
 
 func FindAllPhoto(c *gin.Context) ([]models.Photo, error) {
 	var photos []models.Photo
@@ -25,7 +17,7 @@ func FindAllPhoto(c *gin.Context) ([]models.Photo, error) {
 }
 
 func CreatePhoto(c *gin.Context) (models.Photo, error) {
-	var form PhotoRequestform
+	var form dto.PhotoRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
 		return models.Photo{}, err
 	}
@@ -65,7 +57,7 @@ func UpdatePhotoById(c *gin.Context) (models.Photo, error, int) {
 		return photo, err, http.StatusNotFound
 	}
 
-	var form PhotoRequestform
+	var form dto.PhotoRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
 		return photo, err, http.StatusBadRequest
 	}

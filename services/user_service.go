@@ -7,12 +7,17 @@ import (
 	"github.com/babyplug/api-challenge-gin-gorm/database"
 	"github.com/babyplug/api-challenge-gin-gorm/models"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRequestform struct {
-	Name  string  `json:"name" binding:"required"`
-	Email *string `json:"email" binding:"required"`
-	Age   uint8   `json:"age" binding:"required"`
+	Name      string  `json:"name" binding:"required"`
+	Email     *string `json:"email" binding:"required"`
+	Age       uint8   `json:"age" binding:"required"`
+	FirstName string  `json:"firstName" binding:"required"`
+	LastName  string  `json:"lastName" binding:"required"`
+	Username  string  `json:"username" binding:"required"`
+	Password  string  `json:"password" binding:"required"`
 }
 
 func FindAllUser(c *gin.Context) {
@@ -34,11 +39,17 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(form.Password), bcrypt.DefaultCost)
+
 	// Create book
 	user := models.User{
-		Name:  form.Name,
-		Email: form.Email,
-		Age:   form.Age,
+		Name:      form.Name,
+		Email:     form.Email,
+		Age:       form.Age,
+		FirstName: form.FirstName,
+		LastName:  form.LastName,
+		Username:  form.Username,
+		Password:  string(hashPassword),
 	}
 	database.DB.Create(&user)
 
@@ -53,6 +64,14 @@ func CreateUser(c *gin.Context) {
 func getUserById(id string) (models.User, error) {
 	var user models.User
 	if err := database.DB.Where("id = ?", id).First(&user).Error; err != nil {
+		return user, errors.New("User not found!")
+	}
+	return user, nil
+}
+
+func findUserByUsername(username string) (models.User, error) {
+	var user models.User
+	if err := database.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		return user, errors.New("User not found!")
 	}
 	return user, nil

@@ -1,9 +1,9 @@
 package database
 
 import (
+	"github.com/babyplug/api-challenge-gin-gorm/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"github.com/babyplug/api-challenge-gin-gorm/models"
 )
 
 var DB *gorm.DB

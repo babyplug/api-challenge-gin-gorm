@@ -5,14 +5,10 @@ import (
 	"net/http"
 
 	"github.com/babyplug/api-challenge-gin-gorm/database"
+	"github.com/babyplug/api-challenge-gin-gorm/dto"
 	"github.com/babyplug/api-challenge-gin-gorm/models"
 	"github.com/gin-gonic/gin"
 )
-
-type AuthorRequestform struct {
-	Name   string `json:"name" binding:"required"`
-	Photos []uint `json:"photoId,omitempty"`
-}
 
 func FindAllAuthor(c *gin.Context) ([]models.Author, error) {
 	var authors []models.Author
@@ -21,7 +17,7 @@ func FindAllAuthor(c *gin.Context) ([]models.Author, error) {
 }
 
 func CreateAuthor(c *gin.Context) (models.Author, error) {
-	var form AuthorRequestform
+	var form dto.AuthorRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
 		return models.Author{}, err
 	}
@@ -55,7 +51,7 @@ func UpdateAuthorById(c *gin.Context) (models.Author, error, int) {
 		return author, err, http.StatusNotFound
 	}
 
-	var form AuthorRequestform
+	var form dto.AuthorRequestform
 	if err := c.ShouldBindJSON(&form); err != nil {
 		return author, err, http.StatusBadRequest
 	}

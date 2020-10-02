@@ -5,6 +5,7 @@ import (
 
 	"github.com/babyplug/api-challenge-gin-gorm/controllers"
 	"github.com/babyplug/api-challenge-gin-gorm/database"
+	_ "github.com/babyplug/api-challenge-gin-gorm/docs"
 	"github.com/babyplug/api-challenge-gin-gorm/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -29,9 +30,10 @@ func main() {
 	database.ConnectDatabase()
 
 	router := gin.Default()
+	router.StaticFile("/swagger-ui.json", "./swagger.json")
+
 	apiRouter := router.Group("/api")
 	apiRouter.POST("/login", controllers.Login)
-
 	{
 		// create	auth routes
 		authRouter := apiRouter.Group("/auth", middleware.TokenAuthMiddleware())

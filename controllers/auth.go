@@ -23,11 +23,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	response := dto.CredentialsResponse{
+		Prefix: "Bearer",
+		Token:  token,
+	}
+
 	c.JSON(
 		http.StatusOK,
-		gin.H{
-			"prefix": "Bearer",
-			"token":  token,
-		},
+		response,
 	)
 }
